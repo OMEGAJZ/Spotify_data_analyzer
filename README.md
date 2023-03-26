@@ -7,6 +7,7 @@ I created a basic spotify data analyzer. Feel free to leave some feedback and le
 the next release will include the following feature:
 
 automatic analysis of spotify advanced streaming history
-Filter by year
-filter by device (smartphone, desktop, etc.)
-and more
+- Filter by year, Month, Day
+- Filter by country / region
+- filter by device (smartphone, desktop, etc.)
+- and more
