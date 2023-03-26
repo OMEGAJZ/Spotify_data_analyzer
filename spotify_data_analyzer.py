@@ -101,17 +101,17 @@ else:
     #### Interested what your data could look like? Download my example file and try it yourself!
     ''')
 
-    # Lade die JSON-Datei
+    # Load Json
     with open("spotify_data_example.json", "r") as f:
         data = f.read()
 
-    # Konvertiere die Datei in base64
+    # Convert to base64
     b64 = base64.b64encode(data.encode()).decode()
 
-    # Erstelle den Download-Link
+    # Create DL-Link
     href = f'<a href="data:file/json;base64,{b64}" download="spotify_data_example.json">Download example spotify data json file</a>'
 
-    # Füge den Download-Link hinzu
+    # Import Dl-Link
     st.markdown(href, unsafe_allow_html=True)
 
     st.write("Feel free to share this web app and leave some feedback on my Github, many thanks! <3")
