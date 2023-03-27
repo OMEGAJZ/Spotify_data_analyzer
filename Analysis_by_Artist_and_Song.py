@@ -89,9 +89,9 @@ else:
     1. Open this [link](https://www.spotify.com/de/account/privacy/) and sign in to your spotify account
     2. Scroll down, check the box for "Account Data"
     3. Click on "Request"
-    4. Receive your data as a json file from spotify
+    4. You will receive few files from Spotify. Take the one with the name "StreamingHistory0"
     5. Upload your data into the upload box on the sidebar
-    6. Enjoy your data! 
+    6. Enjoy your insights! 
     ''')
 
     st.markdown('''
