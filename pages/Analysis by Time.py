@@ -31,6 +31,10 @@ if uploaded_file is not None:
     # Change the column names according to the user's request
     df.columns = ["Date and Time", "Artist", "Song title", "Playtime"]
 
+    # Apply the functions to the Playtime column and create new columns
+    df["Playtime in hours"] = (df["Playtime"]/3600000)
+    df["Playtime in minutes"] = (df["Playtime"]/60000)
+
     #Convert the "Date and Time" column to a datetime data type
     df["Date and Time"] = pd.to_datetime(df["Date and Time"])
 
@@ -40,48 +44,56 @@ if uploaded_file is not None:
     # Group by "Time bin" and sum the "Playtime" column
     grouped_time_df = df.groupby("Time bin")["Playtime"].sum()
 
-    # Apply the functions to the Playtime column and create new columns
-    df["Playtime in hours"] = (df["Playtime"]/3600000)
-    df["Playtime in minutes"] = (df["Playtime"]/60000)
+    #convert the data to datetime format
+    df['month bin'] = pd.to_datetime(df['Date and Time'])
 
-    # Group by Artist and sum the Playtime columns
-    grouped_artist_df = df.groupby("Artist")[["Playtime", "Playtime in hours", "Playtime in minutes"]].sum()
+    #define bins for months
+    bins = [0, 1, 2, 3, 4, 5, 6, 7, 8 ,9 ,10 ,11 ,12]
 
-     # Group by Song title and sum the Playtime columns
-    grouped_song_df = df.groupby("Song title")[["Playtime", "Playtime in hours", "Playtime in minutes"]].sum()
+    #create a new column for month
+    df['month bin'] = df['Date and Time'].dt.month
 
-    # Sort by Playtime in minutes descending and get the top 50 rows
-    sorted_artist_df = grouped_artist_df.sort_values("Playtime in minutes", ascending=False).head(50)
-    sorted_song_df = grouped_song_df.sort_values("Playtime in minutes", ascending=False).head(50)
+    #group by month and sum playtime in hours
+    grouped = df.groupby(pd.cut(df['month bin'], bins=bins))['Playtime in hours'].sum()
 
-    # Display the top artists based on the selected number
-    # Create a slider to allow the user to select the number of top artists to display
-    num_top_artists = st.slider("Select the number of top artists to display:", 5, 50, 10, 5)
-    st.subheader(f"Top {num_top_artists} streamed artists")
-    top_artists_df = sorted_artist_df.head(num_top_artists)
-    st.dataframe(top_artists_df.style.format(precision=0))
-    st.write("Top Artists visualized")
-    chart = alt.Chart(top_artists_df.reset_index()).mark_bar().encode(y=alt.Y("Artist", sort="-x"), x="Playtime in hours")
-    st.altair_chart(chart)
+    # Datetime-Spalte als Index setzen
+    df.index = pd.to_datetime(df['Date and Time'])
 
-    # Display the top songs based on the selected number
-    # Create a slider to allow the user to select the number of top songs to display
-    num_top_songs = st.slider("Select the number of top songs to display:", 5, 50, 10, 5)
-    st.subheader(f"Top {num_top_songs} streamed songs")
-    top_songs_df = sorted_song_df.head(num_top_songs)
-    st.dataframe(top_songs_df.style.format(precision=0))
-    st.write("Top Songs visualized")
-    chart = alt.Chart(top_songs_df.reset_index()).mark_bar().encode(y=alt.Y("Song title", sort="-x", axis=alt.Axis(labelLimit=150)), x="Playtime in hours")
-    st.altair_chart(chart)
+    # Gruppieren nach Wochentag und Summieren von Playtime in Hours
+    grouped = df.groupby(df.index.weekday)['Playtime in hours'].sum()
+
+    # Umbenennen der Wochentage
+    grouped.index = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+
+    # Create a new column "weekday" based on the "Date and Time" column
+    df['weekday'] = df['Date and Time'].dt.day_name()
+
+    # Create a bar chart with the data from the "weekday" column
+    st.header("You loved to listen to music on these days!")
+    st.write("Streaming hours distribution")
+    fig3 = alt.Chart(df).mark_bar(size=105).encode(
+        alt.X("weekday", sort=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], title="Day of the Week", axis=alt.Axis(labelAngle=0)),
+        alt.Y("sum(Playtime in hours)", title="Total Playtime (h)")
+    ).properties(width=850, height=370)
+    st.altair_chart(fig3)
+
+    # Create a histogram with the data from the "Month bin" column
+    st.header("You loved to listen to music in these months!")
+    st.write("Streaming hours distribution")
+    fig1 = alt.Chart(df).mark_bar().encode(
+        alt.X("month bin",  bin=alt.Bin(step=1), title="Month of the year"),
+        alt.Y("sum(Playtime in hours)", title="Total Playtime (h)")
+    ).properties(width=850, height=400)
+    st.altair_chart(fig1)
 
     # Create a histogram with the data from the "Time bin" column
     st.header("You loved to listen to music at these times!")
     st.write("Streaming hours distribution")
-    fig = alt.Chart(df).mark_bar().encode(
-    alt.X("Time bin", bin=alt.Bin(step=1), title="Hour of the day"),
-    alt.Y("sum(Playtime in hours)", title="Total Playtime (h)")
+    fig0 = alt.Chart(df).mark_bar().encode(
+        alt.X("Time bin", bin=alt.Bin(step=1), title="Hour of the day"),
+        alt.Y("sum(Playtime in hours)", title="Total Playtime (h)")
     ).properties(width=850, height=400)
-    st.altair_chart(fig)
+    st.altair_chart(fig0)
 
 else:
     st.markdown('''
