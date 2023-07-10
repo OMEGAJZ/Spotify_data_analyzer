@@ -125,6 +125,4 @@ else:
 
     # Import Dl-Link
     st.markdown(href, unsafe_allow_html=True)
-
-    st.write("Feel free to share this web app and leave some feedback on my Github, many thanks! <3")
     
